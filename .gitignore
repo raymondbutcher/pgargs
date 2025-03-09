@@ -1,0 +1,6 @@
+.direnv
+.mypy_cache
+.pytest_cache
+.ropeproject
+.ruff_cache
+__pycache__
