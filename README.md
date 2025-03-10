@@ -7,11 +7,19 @@ asyncpg only supports positional arguments, not named arguments.
 pgargs makes it easy to prepare queries and positional arguments
 for asyncpg using f-strings and named arguments.
 
+## Install
+
+```sh
+pip install pgargs
+```
+
 ## What it looks like
 
 Lower level arguments usage:
 
 ```py
+from pgargs import Args
+
 args = Args(name="bilbo", age=111)
 query = f"SELECT * FROM table WHERE name = {args.name} AND age = {args.age}"
 await conn.fetch(query, *args)
@@ -20,6 +28,8 @@ await conn.fetch(query, *args)
 Higher level columns usage:
 
 ```py
+from pgargs import Args, Cols
+
 cols = Cols(name="bilbo", age=111)
 query = f"INSERT INTO table {cols.names} VALUES {cols.values}"
 await conn.execute(query, *cols.args)
