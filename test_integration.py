@@ -34,7 +34,7 @@ class UserFood(BaseModel, frozen=True):
 
 
 class UserRepository:
-    def __init__(self):
+    def __init__(self) -> None:
         self.conn = AsyncMock()
 
     async def add_user(self, payload: AddUserPayload) -> AddUserResult:
@@ -72,7 +72,7 @@ class UserRepository:
         record = await self.conn.fetchrow(query, *args)
         return GetUserResult.model_validate(record) if record else None
 
-    async def update_user(self, user_id: int, payload: UpdateUserPayload):
+    async def update_user(self, user_id: int, payload: UpdateUserPayload) -> None:
         cols = Cols(payload.model_dump(exclude_unset=True))
         if cols:
             query = f"UPDATE users SET {cols.assignments} WHERE id = {cols.args.id}"
@@ -86,7 +86,7 @@ def repo() -> UserRepository:
 
 
 @pytest.mark.asyncio
-async def test_add_user(repo: UserRepository):
+async def test_add_user(repo: UserRepository) -> None:
     repo.conn.fetchrow.return_value = {"id": 1}
     result = await repo.add_user(AddUserPayload(name="bilbo", email="bilbo@shire.net"))
     assert result == AddUserResult(id=1)
@@ -98,7 +98,7 @@ async def test_add_user(repo: UserRepository):
 
 
 @pytest.mark.asyncio
-async def test_eat_food(repo: UserRepository):
+async def test_eat_food(repo: UserRepository) -> None:
     repo.conn.fetch.return_value = [
         {"user_id": 1, "food_name": "turnip"},
         {"user_id": 1, "food_name": "potato"},
@@ -119,7 +119,7 @@ async def test_eat_food(repo: UserRepository):
 
 
 @pytest.mark.asyncio
-async def test_get_user(repo: UserRepository):
+async def test_get_user(repo: UserRepository) -> None:
     repo.conn.fetchrow.return_value = {
         "id": 123,
         "name": "bilbo",
@@ -138,7 +138,7 @@ async def test_get_user(repo: UserRepository):
 
 
 @pytest.mark.asyncio
-async def test_update_user_with_email(repo: UserRepository):
+async def test_update_user_with_email(repo: UserRepository) -> None:
     await repo.update_user(
         user_id=1,
         payload=UpdateUserPayload(email="bilbo@shire.net", age=111),
@@ -152,7 +152,7 @@ async def test_update_user_with_email(repo: UserRepository):
 
 
 @pytest.mark.asyncio
-async def test_update_user_with_name(repo: UserRepository):
+async def test_update_user_with_name(repo: UserRepository) -> None:
     await repo.update_user(
         user_id=2,
         payload=UpdateUserPayload(name="frodo", age=33),
@@ -166,6 +166,6 @@ async def test_update_user_with_name(repo: UserRepository):
 
 
 @pytest.mark.asyncio
-async def test_update_user_with_empty_payload(repo: UserRepository):
+async def test_update_user_with_empty_payload(repo: UserRepository) -> None:
     await repo.update_user(user_id=1, payload=UpdateUserPayload())
     assert not repo.conn.execute.called

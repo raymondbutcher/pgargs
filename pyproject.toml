@@ -14,3 +14,6 @@ dev = [
     "pytest-asyncio>=0.25.3",
     "ruff>=0.9.10",
 ]
+
+[tool.mypy]
+strict = true

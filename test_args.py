@@ -2,7 +2,7 @@ from pgargs import Args
 import pytest
 
 
-def test_init():
+def test_init() -> None:
     # Initialize args and add values values using all available methods.
     args = Args({"a": "init.dict.a"}, b="init.kwargs.b")
     args.c = "set.attr.c"
@@ -22,7 +22,7 @@ def test_init():
     )
 
 
-def test_call_error():
+def test_call_error() -> None:
     # Access two arguments.
     args = Args()
     assert f"{args.a}, {args.b}" == "$1, $2"
@@ -32,7 +32,7 @@ def test_call_error():
         assert args(a=1)
 
 
-def test_call_success():
+def test_call_success() -> None:
     # Args can be called to include more values.
     # The returned values will be merged from 2 places.
     args = Args({"a": "args.a", "b": "args.b"})  # lowest priority
@@ -45,7 +45,7 @@ def test_call_success():
     assert args(**kwargs) == ("args.a", "kwargs.b")
 
 
-def test_call_iterable_error():
+def test_call_iterable_error() -> None:
     # Access two arguments.
     args = Args()
     assert f"{args.a}, {args.b}" == "$1, $2"
@@ -56,7 +56,7 @@ def test_call_iterable_error():
         assert list(args(items))
 
 
-def test_call_iterable_success():
+def test_call_iterable_success() -> None:
     # Args can be called with an iterable,
     # for use with executemany and fetchmany.
     # The final values will be merged from 3 places.
@@ -75,7 +75,7 @@ def test_call_iterable_success():
     ]
 
 
-def test_unpack_error():
+def test_unpack_error() -> None:
     args = Args()
     assert f"{args.a}" == "$1"
 
@@ -85,7 +85,7 @@ def test_unpack_error():
         assert [*args]
 
 
-def test_unpack_success():
+def test_unpack_success() -> None:
     args = Args({"a": 1}, b=2, c=3)
 
     # Unpacking returns nothing when nothing has been accessed.

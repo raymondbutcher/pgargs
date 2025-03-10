@@ -107,7 +107,7 @@ class Cols:
     def __getitem__(self, key: str) -> Any:
         return self.args._vals[key]
 
-    def __setitem__(self, key, value) -> None:
+    def __setitem__(self, key: str, value: Any) -> None:
         self.args[key] = value
         self._keys[key] = None
 
