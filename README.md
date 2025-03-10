@@ -1,11 +1,11 @@
 # pgargs
 
-A tiny library for creating asyncpg queries with f-strings
-and named arguments.
+A tiny library for creating [asyncpg](https://github.com/MagicStack/asyncpg)
+queries with f-strings and named arguments.
 
 asyncpg only supports positional arguments, not named arguments.
-This helps with rendering queries and positional arguments for asyncpg
-using f-strings and named arguments.
+pgargs makes it easy to prepare queries and positional arguments
+for asyncpg using f-strings and named arguments.
 
 ## What it looks like
 
@@ -33,7 +33,7 @@ await conn.execute(query, *args)
 
 ## Args usage
 
-Use the `Args` class in f-strings to build up queries and positional arguments.
+Use `Args` instances in f-strings to build up queries and positional arguments.
 
 ```py
 from pgargs import Args
@@ -47,11 +47,10 @@ args = Args()
 args.name = "bilbo"
 args["age"] = 111
 
-# Use the args instance in an f-string to create a query
-# and build up positional arguments.
+# Use args in an f-string to create a query and build up positional arguments.
 query = f"SELECT * FROM table WHERE name = {args.name} AND age = {args.age}"
 
-# Unpack args into asyncpg method to get the positional values.
+# Unpack args into an asyncpg method to get the positional values.
 await conn.fetch(query, *args)
 
 # query = "SELECT * FROM table WHERE name = $1 AND age = $2"
@@ -61,18 +60,15 @@ await conn.fetch(query, *args)
 ## Args usage with `executemany` and `fetchmany`
 
 ```py
+args = Args()
+query = f"SELECT * FROM table WHERE name = {args.name} AND age = {args.age}"
+
+# Use args as a callable, passing in an iterable of dicts,
+# to get an iterable of positional values.
 items = [
     {"name": "bilbo", "age": 111},
     {"name": "frodo", "age": 33},
 ]
-
-# Use an empty args instance in an f-string to create a query
-# and build up positional arguments.
-args = Args()
-query = f"SELECT * FROM table WHERE name = {args.name} AND age = {args.age}"
-
-# Use the args instance as a callable, passing in an iterable of dicts,
-# to generate an iterable of positional values.
 await conn.fetchmany(query, args(items))
 
 # query = "SELECT * FROM table WHERE name = $1 AND age = $2"
@@ -99,36 +95,38 @@ await conn.fetch(query, *args)
 
 ## Cols usage
 
+Use `Cols` instances to render groups of columns together in queries.
+
 ```py
 from pgargs import Cols
 
-# Create a cols instance.
+# Create a Cols instance.
 # It supports various methods of adding column names and values,
 # at initialization time or afterwards.
-cols = Cols({"adventurous": True}, hungry=False)
-cols["covetous"] = True
+cols = Cols("hungry", {"adventurous": False}, covetous=False)
+cols["hungry"] = True
 
+# Use cols in an f-string to render all columns together.
 query = f"INSERT INTO users {cols.names} VALUES {cols.values}"
 await conn.execute(query, *cols.args)
 
-# query = "INSERT INTO users adventurous, hungry, covetous VALUES ($1, $2, $3)"
-# *args = (true, false, true)
+# query = "INSERT INTO users hungry, adventurous, covetous VALUES ($1, $2, $3)"
+# *args = (true, false, false)
 ```
 
 ## Cols usage with `executemany` and `fetchmany`
 
 ```py
-# Start with a list of items to delete.
+# Create a Cols instance with column names but no values.
+cols = Cols("name", "age")
+query = f"DELETE FROM users WHERE {cols.conditions}"
+
+# Use cols.args as a callable, passing in an iterable of dicts,
+# to get an iterable of positional values.
 items = [
     {"name": "bilbo", "age": 111},
     {"name": "frodo", "age": 33},
 ]
-
-# Create cols with the relevant column names but no values.
-cols = Cols("name", "age")
-query = f"DELETE FROM users WHERE {cols.conditions}"
-
-# Use cols.args(items) to generate an iterable of value tuples.
 await conn.executemany(query, cols.args(items))
 
 # query = "DELETE FROM users WHERE name = $1 AND age = $2"
@@ -138,10 +136,12 @@ await conn.executemany(query, cols.args(items))
 ## Composing cols and args
 
 ```py
+# Create a shared Args instance to use with multiple Cols instances.
 args = Args(rating="s-tier")
 search = Cols(args, name="bilbo", age=111)
 changes = Cols(args, adventurous=False, hungry=True)
 
+# Build a complex query using an f-string, cols, and args.
 query = f"UPDATE users SET {changes.assignments} WHERE {search.conditions} AND rating = {args.rating}"
 await conn.execute(query, *args)
 
