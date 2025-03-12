@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: "postgres:17.4"
+    environment:
+      PGUSER: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pgargs
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+  tests:
+    build: .
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pgargs
+      POSTGRES_HOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy

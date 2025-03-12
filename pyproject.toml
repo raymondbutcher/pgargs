@@ -15,6 +15,7 @@ repository = "https://github.com/raymondbutcher/pgargs.git"
 
 [dependency-groups]
 dev = [
+    "asyncpg>=0.30.0",
     "mypy>=1.15.0",
     "pydantic>=2.10.6",
     "pytest>=8.3.5",

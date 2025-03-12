@@ -1,0 +1,10 @@
+.git
+.github
+.gitignore
+.mypy_cache
+.pytest_cache
+.ropeproject
+.ruff_cache
+.venv
+__pycache__
+dist
