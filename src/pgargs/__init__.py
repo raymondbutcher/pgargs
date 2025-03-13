@@ -99,10 +99,12 @@ class Cols:
 
         self._keys: dict[str, None] = {}  # use as an ordered set
         self.add(*names)
-        self.update(data | kwargs)
+        self.update(data, **kwargs)
 
     def __len__(self) -> int:
         return len(self._keys)
+
+    # Dictionary access
 
     def __getitem__(self, key: str) -> Any:
         return self.args._vals[key]
@@ -112,34 +114,62 @@ class Cols:
         self._keys[key] = None
 
     def add(self, *keys: str) -> None:
+        """
+        Add column names without values.
+        Use this when building queries for executemany and fetchmany.
+
+        """
         for key in keys:
             self.args[key]
             self._keys[key] = None
 
-    def update(self, data: dict[str, Any]) -> None:
-        for key, value in data.items():
+    def update(self, data: Optional[dict[str, Any]] = None, /, **kwargs: Any) -> None:
+        """
+        Add column names with values.
+
+        """
+        if data:
+            for key, value in data.items():
+                self[key] = value
+        for key, value in kwargs.items():
             self[key] = value
 
     @property
     def assignments(self) -> str:
+        """
+        Return value assignments in the format "field1 = $1, field2 = $2"
+
+        """
         if not self._keys:
             raise ValueError
         return ", ".join(f"{key} = {self.args[key]}" for key in self._keys.keys())
 
     @property
     def conditions(self) -> str:
+        """
+        Return conditions in the format "field1 = $1 AND field2 = $2"
+
+        """
         if not self._keys:
             raise ValueError
         return " AND ".join(f"{key} = {self.args[key]}" for key in self._keys.keys())
 
     @property
     def names(self) -> str:
+        """
+        Return column names in the format "(field1, field2)"
+
+        """
         if not self._keys:
             raise ValueError
         return "(" + ", ".join(self._keys.keys()) + ")"
 
     @property
     def values(self) -> str:
+        """
+        Return column values in the format "($1, $2)"
+
+        """
         if not self._keys:
             raise ValueError
         return "(" + ", ".join(self.args[key] for key in self._keys.keys()) + ")"
