@@ -120,7 +120,7 @@ cols["hungry"] = True
 query = f"INSERT INTO users {cols.names} VALUES {cols.values}"
 await conn.execute(query, *cols.args)
 
-# query = "INSERT INTO users hungry, adventurous, covetous VALUES ($1, $2, $3)"
+# query = "INSERT INTO users (hungry, adventurous, covetous) VALUES ($1, $2, $3)"
 # *args = (true, false, false)
 ```
 
